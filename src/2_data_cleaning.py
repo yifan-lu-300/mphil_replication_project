@@ -6,7 +6,6 @@ from sspipe import p
 # set up paths
 origin_path = os.path.abspath('..') | p(os.path.join, 'data', 'tab')
 derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
-
 # read data
 sample = pd.read_csv(os.path.join(derived_path, 'sample_uncleaned.csv'), low_memory=False)
 
@@ -110,10 +109,10 @@ adl_1 = [f'heada0{number}_1' for number in range(1, 10)] + ['heada10_1', 'heada1
 # sample[adl_1].apply(lambda x: x.isin([-9, -8, -1])).all(axis=1).sum() # no NAs
 sample['adl_1'] = ((sample[adl_1] >= 1) & (sample[adl_1] <= 10)).sum(axis=1)
 
-# self-assessed health poor or fair #TODO hehelfb?
-# sample['hehelf_1'].value_counts(dropna=False) # NAs present
-sample['poor_health_1'] = np.select(condlist=[sample['hehelf_1'].isin([4, 5]), sample['hehelf_1'].isin([1, 2, 3])],
-                                    choicelist=[1, 0],
+# self-assessed health poor or fair
+pd.crosstab(sample['hegenh_1'], sample['hehelf_1']) # so they complement each other
+sample['poor_health_1'] = np.select(condlist=[sample['hehelf_1'].isin([4, 5]), sample['hehelf_1'].isin([1, 2, 3]), sample['hegenh_1'].isin([3, 4, 5]), sample['hegenh_1'].isin([1, 2])],
+                                    choicelist=[1, 0, 1, 0],
                                     default=np.nan)
 
 # has diagnosed cardio disease #TODO retired
@@ -240,9 +239,10 @@ sample['cesd_1'] = np.select(condlist=[(sample[cesd_list_1] < 0).any(axis=1), (s
                              default=0)
 
 # has limiting long-standing illness (at wave 1)
+# sample['heill_1'].value_counts() # NAs present
 # sample['helim_1'].value_counts() # NAs present
-sample['limit_1'] = np.select(condlist=[sample['helim_1'] == 1, sample['helim_1'] == 2],
-                              choicelist=[1, 0],
+sample['limit_1'] = np.select(condlist=[(sample['heill_1'] == 1) & (sample['helim_1'] == 1), sample['heill_1'] == 2, (sample['heill_1'] == 1) & (sample['helim_1'] == 2)],
+                              choicelist=[1, 0, 0],
                               default=np.nan)
 
 # no all NAs in cardio & noncardio
@@ -336,22 +336,4 @@ sample['ex_alive_missing_1'] = np.where(sample['exlo80_1'] < 0, 1, 0)
 ########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_cleaned.csv'), index=False)
 
-# ########## Inspection
-# pd.crosstab(sample['treatment'], sample['hediman_3'])
-
-# pd.crosstab(sample['treatment'], sample['heagary_3'])
-
-# sample['hediman_3'].value_counts()
-
-# sample['dhediman_3'].value_counts() # newly reported (merged)
-# sample['heagary_3'].value_counts()
-# sample['HeagaRY_2'].value_counts()
-
-# pd.crosstab(sample['dhediman_3'], sample['heagary_3'])
-# # so only people who reported newly diagnosed will be asked year/month
-
-# pd.crosstab(sample['hediman_3'], sample['dhediman_3'])
-# pd.crosstab(sample['hediman_3'], sample['heagary_3'])
-
-# sample['HeagaRY_2'].value_counts()
-# sample['psych_3'].value_counts()
+########## Inspection

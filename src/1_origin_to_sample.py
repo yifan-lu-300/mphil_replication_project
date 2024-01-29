@@ -15,7 +15,7 @@ vars_1_core = ['idauniq', 'indsex', 'indager', 'indobyr', 'couple1', 'digran', '
                'wpsjoby', 'wpsjobm', 'wpcjob', 'wphjob', 'wperet'] + \
     ['eligw1', 'askpx1', 'iintdtm', 'iintdty', 'intdaty', 'gor', 'chinhh1', 'heacta', 'heactb', 'dinma', 'dinfa', 'cflisen', 'wpphi'] + \
     [f'heada0{number}' for number in range(1,10)] + ['heada10', 'heada11'] + \
-    ['hehelf', 'hehelfb', 'hegenhb', 'helim'] + \
+    ['hehelf', 'hehelfb', 'hegenh', 'hegenhb', 'heill', 'helim'] + \
     [f'hedim0{number}' for number in range(1,8)] + [f'hedib0{number}' for number in range(1,10)] + ['hedib10'] + \
     ['psceda', 'pscedb', 'pscedc', 'pscedd', 'pscede', 'pscedf', 'pscedg', 'pscedh'] + \
     ['exlo80', 'expw', 'exhlim'] + \
@@ -129,4 +129,6 @@ sample = pd.merge(sample_123,
 employed_id = wave_123.loc[employed_23, 'idauniq']
 sample['treatment'] = np.where(sample['idauniq'].isin(employed_id), 0, 1) # D = 1 for retired individuals
 sample['treatment'].value_counts()
+
+########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_uncleaned.csv'), index=False)

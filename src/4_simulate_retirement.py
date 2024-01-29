@@ -8,16 +8,8 @@ from sspipe import p, px
 # Set up paths
 origin_path = os.path.abspath('..') | p(os.path.join, 'data', 'tab')
 derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
-
 # Read data
 sample = pd.read_csv(os.path.join(derived_path, 'sample_cleaned.csv'), low_memory=False, parse_dates=['retire_month']) # datetime info will not be preserved in to_csv
-
-# Inspection
-sample['treatment'].value_counts()
-sample['outside_uk_1'].value_counts(dropna=False)
-
-sample.loc[sample['angina_2'].notna() | sample['angina_3'].notna(), ['treatment', 'angina_2', 'angina_3']]
-sample.loc[sample['stroke_2'].notna() | sample['stroke_3'].notna(), ['treatment', 'stroke_2', 'stroke_3']] # there are cases dated back to 1995
 
 # Approach 1: Regression
 # Assume people are all born in July
@@ -74,11 +66,6 @@ sample['final_month_2'] = np.where(sample['treatment'] == 0, sample['pred_month_
 # check
 pd.isna(sample['final_month_2']).sum() # there are 39 NAs is the final retirement month, as there are missing values in some of the predictors
 
-# Approach 2: PSM 
-
-# Approach 3: More advanced machine learning methods (with training/test sets)
-# The main problem is that I lack birth month data
-
 ########## Disease date vs. Retirement date
 # no NAs in angina_1, and NAs in angina_2 and angina_3 all mean 'not applicable' rather than e.g. refusal
 def disease_pre_retire(row, name):
@@ -98,10 +85,6 @@ sample['diabetes_pre'] = sample.apply(disease_pre_retire, name='diabetes', axis=
 sample['arthritis_pre'] = sample.apply(disease_pre_retire, name='arthritis', axis=1)
 sample['cancer_pre'] = sample.apply(disease_pre_retire, name='cancer', axis=1)
 sample['psych_pre'] = sample.apply(disease_pre_retire, name='psych', axis=1)
-
-# check
-sample.loc[sample['angina_pre'] == 1, ['treatment', 'angina_1', 'angina_2', 'angina_3', 'final_month_2']]
-sample.loc[sample['psych_pre'] == 1, ['treatment', 'psych_1', 'psych_2', 'psych_3', 'final_month_2']]
 
 def disease_post_retire(row, name):
     if row[f'{name}_1'] == 1:
@@ -123,9 +106,7 @@ sample['arthritis_post'] = sample.apply(disease_post_retire, name='arthritis', a
 sample['cancer_post'] = sample.apply(disease_post_retire, name='cancer', axis=1)
 sample['psych_post'] = sample.apply(disease_post_retire, name='psych', axis=1)
 
-# check
-sample.loc[sample['angina_post'] == 1, ['treatment', 'angina_1', 'angina_2', 'angina_3', 'final_month_2']]
-sample.loc[sample['psych_post'] == 1, ['treatment', 'psych_1', 'psych_2', 'psych_3', 'final_month_2']] # observations may be too fewer
-
 ########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_simulate_retire.csv'), index=False)
+
+########## Inspection
