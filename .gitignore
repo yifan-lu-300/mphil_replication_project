@@ -1,0 +1,4 @@
+data/
+.idea/
+src/0_inspection.py
+*.pdf

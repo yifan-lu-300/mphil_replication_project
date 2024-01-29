@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage[margin = 1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy} % Turn on the style
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[R]{\thepage} % R = Right
+\renewcommand{\headrulewidth}{0pt} % remove the header rule
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{% Redefine plain style, which is used for title page
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[R]{\thepage} % R = Right
+\renewcommand{\headrulewidth}{0pt} % remove the header rule
+\renewcommand{\footrulewidth}{0pt}}
+
+\usepackage{setspace}
+\onehalfspacing % set line spacing to 1.5
+\usepackage{parskip}
+
+\title{\vspace{-8ex} Replication project \vspace{-2ex}}
+\author{Does retirement trigger ill health?}
+\date{\vspace{-4ex}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\begin{tabular}{lrr}
+    \toprule
+    & Employed & Retired \\
+    Observations & (1247) & (192) \\
+    \midrule
+    \textit{Health outcomes after retirement} & & \\
+    Any newly diagnosed disease & 0.04 & 0.17 \\
+    Newly diagnosed angina & 0.002 & 0.01 \\
+    New heart attack & 0.002 & 0.02 \\
+    New stroke & 0.00 & 0.01 \\
+    Newly diagnosed diabetes & 0.01 & 0.03 \\
+    Newly diagnosed arthritis & 0.02 & 0.10 \\
+    Newly diagnosed cancer & 0.003 & 0.03 \\
+    Newly diagnosed psychiatric problem & 0.01 & 0.02 \\
+    Poor self-assessed health & 0.01 & 0.05 \\
+    Limiting long-standing illness & 0.38 & 0.52 \\
+    Number of difficulties in ADL & 0.79 & 1.30 \\
+    \bottomrule
+\end{tabular}    
+
+\end{document}
