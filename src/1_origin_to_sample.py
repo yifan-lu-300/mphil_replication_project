@@ -23,9 +23,10 @@ vars_1_core = ['idauniq', 'indsex', 'indager', 'indobyr', 'couple1', 'digran', '
 
 vars_1_pw = ['idauniq', 'pen_db', 'pen_dc', 'pen_any', 'pripenw1_2002', 'statepenw1_2002']
 vars_1_f = ['idauniq', 'nettotw_bu_s', 'empinc_r_s']
-vars_1_ifs = ['idauniq', 'smoker', 'smokerstat', 'malive', 'falive', 'spage', 'llsill']
+vars_1_ifs = ['idauniq', 'smoker', 'smokerstat', 'malive', 'falive', 'spage', 'llsill'] + \
+    ['hemobwa', 'hemobsi', 'hemobch', 'hemobcs', 'hemobcl', 'hemobst', 'hemobre', 'hemobpu', 'hemobli', 'hemobpi', 'hemob96']
 
-vars_2_core = ['idauniq', 'Hehelf', 'Helim'] + \
+vars_2_core = ['idauniq', 'Hehelf', 'Heill', 'Helim'] + \
     [f"heada0{number}" for number in range(1,10)] + ['heada10'] + \
     [f'wpact{number}' for number in range(1,7)] + ['wpdes', 'wplljy', 'wplljm', 'wpactw'] + \
     [f"hedim0{number}" for number in range(1,9)] + \
@@ -37,7 +38,7 @@ vars_2_core = ['idauniq', 'Hehelf', 'Helim'] + \
      'HeAggR', 'HeAggRY', # cancer
      'HeAghR', 'HeAghRY'] # psychiatric
 
-vars_3_core = ['idauniq', 'hegenh', 'helim'] + \
+vars_3_core = ['idauniq', 'hegenh', 'heill', 'helim'] + \
     ['hemobwa', 'hemobsi', 'hemobch', 'hemobcs', 'hemobcl', 'hemobst', 'hemobre', 'hemobpu', 'hemobli', 'hemobpi'] + \
     ['wpactpw', 'wpactse', 'wpdes', 'wplljy', 'wplljm', 'wpactw'] + \
     ['dhediman', 'heagar', 'heagary', 'hediman', # angina
@@ -132,3 +133,5 @@ sample['treatment'].value_counts()
 
 ########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_uncleaned.csv'), index=False)
+
+########## Inspection

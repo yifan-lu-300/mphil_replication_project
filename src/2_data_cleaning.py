@@ -104,7 +104,7 @@ sample['total_wealth_1'] = sample['nettotw_bu_s_1'].apply(lambda x: np.nan if x 
 # employment income per week #TODO 
 # (sample['empinc_r_s_1'] < 0).sum() # no NAs
 
-# number of difficulties in ADL
+# number of difficulties in ADL #TODO: confirm with mobility items from ifs_derived, but should be okay as values are consistent with original table
 adl_1 = [f'heada0{number}_1' for number in range(1, 10)] + ['heada10_1', 'heada11_1']
 # sample[adl_1].apply(lambda x: x.isin([-9, -8, -1])).all(axis=1).sum() # no NAs
 sample['adl_1'] = ((sample[adl_1] >= 1) & (sample[adl_1] <= 10)).sum(axis=1)
@@ -162,9 +162,11 @@ sample['poor_health_3'] = np.select(condlist=[sample['hegenh_3'].isin([4, 5]), s
                                     default=np.nan)
 
 # limiting long-standing illness
-# sample['helim_3'].value_counts() # NAs present
-sample['limit_3'] = np.select(condlist=[sample['helim_3'] == 1, sample['helim_3'] == 2],
-                              choicelist=[1, 0],
+# pd.crosstab(sample['heill_3'], sample['helim_3']) # so they complement each other
+sample['limit_3'] = np.select(condlist=[(sample['heill_3'] == 1) & (sample['helim_3'] == 1),
+                                        sample['heill_3'] == 2,
+                                        (sample['heill_3'] == 1) & (sample['helim_3'] == 2)],
+                              choicelist=[1, 0, 0],
                               default=np.nan)
 
 # number of ADLs
@@ -186,7 +188,6 @@ sample['last_job_3'] = sample['last_job_year_3'] + '-' + sample['last_job_month_
 # after wave 2 and quit the job again before wave 3, so it may be better to use the second retirement date as the
 # retirement date
 sample['retire_month'] = np.where(sample['last_job_3'].notnull(), sample['last_job_3'], sample['last_job_2']) | p(pd.to_datetime)
-sample['retire_month'][20] | p(type)
 
 ########## Data cleaning - Disease month
 # no -8 and -9, only -1 (not applicable)
@@ -220,6 +221,14 @@ sample['diabetes_1'] = (sample[cardio_1] == 7).any(axis=1).astype(int)
 sample['arthritis_1'] = (sample[noncardio_1] == 3).any(axis=1).astype(int)
 sample['cancer_1'] = (sample[noncardio_1] == 5).any(axis=1).astype(int)
 sample['psych_1'] = (sample[cardio_1] == 7).any(axis=1).astype(int)
+
+########## Data cleaning - health stock
+
+
+
+
+
+
 
 ########## Data cleaning - main analysis
 # squared age (in year 2002)
@@ -258,7 +267,9 @@ sample['cesd_1'] = np.select(condlist=[(sample[cesd_list_1] < 0).any(axis=1), (s
 # has limiting long-standing illness (at wave 1)
 # sample['heill_1'].value_counts() # NAs present
 # sample['helim_1'].value_counts() # NAs present
-sample['limit_1'] = np.select(condlist=[(sample['heill_1'] == 1) & (sample['helim_1'] == 1), sample['heill_1'] == 2, (sample['heill_1'] == 1) & (sample['helim_1'] == 2)],
+sample['limit_1'] = np.select(condlist=[(sample['heill_1'] == 1) & (sample['helim_1'] == 1),
+                                        sample['heill_1'] == 2,
+                                        (sample['heill_1'] == 1) & (sample['helim_1'] == 2)],
                               choicelist=[1, 0, 0],
                               default=np.nan)
 
