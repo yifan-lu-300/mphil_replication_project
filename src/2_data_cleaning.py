@@ -34,7 +34,7 @@ sample['grandchild_1'] = np.select(condlist=[sample['digran_1'] == 1, sample['di
                                    choicelist=[1, 0],
                                    default=np.nan)
 
-# birth outside uk #TODO retired, probably because I took information from two variables
+# birth outside uk #TODO retired: possibly because I took information from two variables and the author did not
 # pd.crosstab(sample['fqcbthr_1'], sample['apobr_1']) # they complement each other
 sample['outside_uk_1'] = np.select(condlist=[sample['fqcbthr_1'] == 2, sample['fqcbthr_1'] == 1, sample['apobr_1'] == 2, sample['apobr_1'] == 1],
                                    choicelist=[1, 0, 1, 0],
@@ -52,7 +52,7 @@ sample['o_levels_1'] = np.where(sample['edqual_1'] == 4, 1, 0)
 # No qualification
 sample['no_qual_1'] = np.where(sample['edqual_1'] == 7, 1, 0)
 
-# Number of years in current job #TODO employed, maybe can also use wpsjobm_1 (month)
+# Number of years in current job #TODO employed: possibly wpsjobm_1 (month)
 # (sample['wpsjoby_1'] < 0).sum() # NAs present
 sample['job_years_1'] = np.where(sample['wpsjoby_1'] > 0, sample['iintdty_1'] - sample['wpsjoby_1'], np.nan)
 
@@ -62,7 +62,7 @@ sample['job_permanent_1'] = np.select(condlist=[sample['wpcjob_1'] == 4, sample[
                                       choicelist=[1, 0],
                                       default=np.nan)
 
-# 1-30h work per week at current job #TODO retired
+# 1-30h work per week at current job #TODO retired: possibly wphwrk
 # (sample['wphjob_1'] < 0).sum() # NAs present
 sample['job_30h_1'] = np.select(condlist=[sample['wphjob_1'].between(1, 30), sample['wphjob_1'] > 30],
                                 choicelist=[1, 0],
@@ -111,8 +111,25 @@ sample['adl_1'] = ((sample[adl_1] >= 1) & (sample[adl_1] <= 10)).sum(axis=1)
 
 # self-assessed health poor or fair
 pd.crosstab(sample['hegenh_1'], sample['hehelf_1']) # so they complement each other
-sample['poor_health_1'] = np.select(condlist=[sample['hehelf_1'].isin([4, 5]), sample['hehelf_1'].isin([1, 2, 3]), sample['hegenh_1'].isin([3, 4, 5]), sample['hegenh_1'].isin([1, 2])],
+sample['poor_health_1'] = np.select(condlist=[sample['hehelf_1'].isin([4, 5]),
+                                              sample['hehelf_1'].isin([1, 2, 3]),
+                                              sample['hegenh_1'].isin([3, 4, 5]),
+                                              sample['hegenh_1'].isin([1, 2])],
                                     choicelist=[1, 0, 1, 0],
+                                    default=np.nan)
+
+# ordered (1 is best and 5 is worst)
+sample['self_health_1'] = np.select(condlist=[sample['hehelf_1'] == 1,
+                                              sample['hehelf_1'] == 2,
+                                              sample['hehelf_1'] == 3,
+                                              sample['hehelf_1'] == 4,
+                                              sample['hehelf_1'] == 5,
+                                              sample['hegenh_1'] == 1,
+                                              sample['hegenh_1'] == 2,
+                                              sample['hegenh_1'] == 3,
+                                              sample['hegenh_1'] == 4,
+                                              sample['hegenh_1'] == 5],
+                                    choicelist=[1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
                                     default=np.nan)
 
 # has diagnosed cardio disease #TODO retired
@@ -139,7 +156,7 @@ sample['ex_limit_1'] = np.where(sample['exhlim_1'] < 0, np.nan, sample['exhlim_1
 
 ########## Data cleaning - health after retirement table
 # poor self-assessed health
-# sample['hegenh_3'].value_counts() # NAs present
+# sample['hegenh_3'].value_counts() # NAs present, but no concerns over two versions of self-reported health
 sample['poor_health_3'] = np.select(condlist=[sample['hegenh_3'].isin([4, 5]), sample['hegenh_3'].isin([1, 2, 3])],
                                     choicelist=[1, 0],
                                     default=np.nan)
@@ -294,17 +311,18 @@ sample['no_activities_1'] = np.select(condlist=[((sample['heacta_1'] == 4) & (sa
                                       default=0)
 
 # missing likelihood that health limits ability to work (at wave 1)
-sample['exhlim_1'].value_counts(dropna=False) # NAs present
+# sample['exhlim_1'].value_counts(dropna=False) # NAs present
 sample['ex_limit_missing_1'] = np.where(sample['exhlim_1'] < 0, 1, 0)
 
 # both parents dead (at wave 1)
-sample['dinma_1'].value_counts(dropna=False) # NAs present
-sample['parents_died_1'] = np.select(condlist=[((sample['dinma_1'] == 2) & sample['dinfa_1'] == 2), ((sample['dinma_1'] < 0) | (sample['dinfa_1'] < 0))],
+# sample['malive_1'].value_counts(dropna=False) # NAs present
+sample['parents_died_1'] = np.select(condlist=[((sample['malive_1'] == 2) & sample['falive_1'] == 2),
+                                               ((sample['malive_1'] < 0) | (sample['falive_1'] < 0))],
                                      choicelist=[1, np.nan],
                                      default=0)
 
 # number of words that could be recalled according to cognitive function test (at wave 1)
-sample['cflisen_1'].value_counts(dropna=False) # NAs present
+# sample['cflisen_1'].value_counts(dropna=False) # NAs present
 sample['recall_words_1'] = np.where(sample['cflisen_1'] < 0, np.nan, sample['cflisen_1'])
 
 # has ever had symptomatic heart attack/angina according to Rose questionnaire (at wave 1) #TODO
@@ -330,7 +348,7 @@ sample['private_health_1'] = np.select(condlist=[sample['wpphi_1'].isin([1, 2]),
                                        default=np.nan)
 
 # missing likelihood of being alive in next 10 years (at wave 1)
-sample['exlo80_1'].value_counts(dropna=False) # NAs present
+# sample['exlo80_1'].value_counts(dropna=False) # NAs present
 sample['ex_alive_missing_1'] = np.where(sample['exlo80_1'] < 0, 1, 0)
 
 ########## Save data
