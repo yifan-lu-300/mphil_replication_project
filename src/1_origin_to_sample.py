@@ -8,18 +8,21 @@ origin_path = os.path.abspath('..') | p(os.path.join, 'data', 'tab')
 derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
 
 # select variables
-vars_0 = ['idauniq', 'genhelf2', 'ghqg2', 'condcnt', 'bmival', 'vitamin'] + \
+vars_0 = ['idauniq', 'genhelf', 'genhelf2', 'ghqg2', 'condcnt', 'bmival', 'vitamin'] + \
+    [f'illsm{number}' for number in range(1, 7)] + \
+    ['cignow', 'dnnow', 'ager', 'topqual3', 'ftptime', 'employe'] + \
     [f'illsm{number}' for number in range(1, 7)]
 
 vars_1_core = ['idauniq', 'indsex', 'indager', 'indobyr', 'couple1', 'digran', 'fqcbthr', 'apobr', 'edqual',
                'wpsjoby', 'wpsjobm', 'wpcjob', 'wphjob', 'wphwrk', 'wperet'] + \
-    ['eligw1', 'askpx1', 'iintdtm', 'iintdty', 'intdaty', 'gor', 'chinhh1', 'heacta', 'heactb', 'cflisen', 'wpphi'] + \
+    ['eligw1', 'askpx1', 'iintdtm', 'iintdty', 'intdaty', 'gor', 'chinhh1', 'cflisen', 'wpphi'] + \
     [f'heada0{number}' for number in range(1,10)] + ['heada10', 'heada11'] + \
     ['hehelf', 'hehelfb', 'hegenh', 'hegenhb', 'heill', 'helim'] + \
     [f'hedim0{number}' for number in range(1,8)] + [f'hedib0{number}' for number in range(1,10)] + ['hedib10'] + \
     ['psceda', 'pscedb', 'pscedc', 'pscedd', 'pscede', 'pscedf', 'pscedg', 'pscedh'] + \
     ['exlo80', 'expw', 'exhlim'] + \
-    [f'wpact{number}' for number in range(1,7)] + ['wpdes', 'wplljy', 'wplljm']
+    [f'wpact{number}' for number in range(1,7)] + ['wpdes', 'wplljy', 'wplljm'] + \
+    ['cfmetm', 'heeye', 'hefunc', 'hehear', 'heala', 'heacta', 'heactb', 'heactc']
 
 vars_1_pw = ['idauniq', 'pen_db', 'pen_dc', 'pen_any', 'pripenw1_2002', 'statepenw1_2002']
 vars_1_f = ['idauniq', 'nettotw_bu_s', 'empinc_r_s']

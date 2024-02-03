@@ -6,10 +6,11 @@ import plotnine as pn
 from sspipe import p, px
 
 # Set up paths
-origin_path = os.path.abspath('..') | p(os.path.join, 'data', 'tab')
 derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
 # Read data
-sample = pd.read_csv(os.path.join(derived_path, 'sample_cleaned.csv'), low_memory=False, parse_dates=['retire_month']) # datetime info will not be preserved in to_csv
+sample = pd.read_csv(os.path.join(derived_path, 'sample_cleaned.csv'),
+                     low_memory=False,
+                     parse_dates=['retire_month']) # datetime info will not be preserved in to_csv
 
 # Approach 1: Regression
 # Assume people are all born in July

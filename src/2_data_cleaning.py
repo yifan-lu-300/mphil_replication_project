@@ -130,7 +130,7 @@ sample['self_health_1'] = np.select(condlist=[sample['hehelf_1'] == 1,
                                               sample['hegenh_1'] == 4,
                                               sample['hegenh_1'] == 5],
                                     choicelist=[1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
-                                    default=np.nan)
+                                    default=np.nan).astype(str)
 
 # has diagnosed cardio disease #TODO retired
 cardio_1 = [f'hedim0{number}_1' for number in range(1, 8)]
@@ -220,15 +220,20 @@ sample['stroke_1'] = (sample[cardio_1] == 8).any(axis=1).astype(int)
 sample['diabetes_1'] = (sample[cardio_1] == 7).any(axis=1).astype(int)
 sample['arthritis_1'] = (sample[noncardio_1] == 3).any(axis=1).astype(int)
 sample['cancer_1'] = (sample[noncardio_1] == 5).any(axis=1).astype(int)
-sample['psych_1'] = (sample[cardio_1] == 7).any(axis=1).astype(int)
+sample['psych_1'] = (sample[noncardio_1] == 7).any(axis=1).astype(int)
 
 ########## Data cleaning - health stock
-
-
-
-
-
-
+# I need to have 13 + 2 dummies for diagnosed diseases, there are 7 above
+sample['hypertension_1'] = (sample[cardio_1] == 1).any(axis=1).astype(int)
+sample['heart_failure_1'] = (sample[cardio_1] == 4).any(axis=1).astype(int)
+sample['heart_murmur_1'] = (sample[cardio_1] == 5).any(axis=1).astype(int)
+sample['heart_rhythm_1'] = (sample[cardio_1] == 6).any(axis=1).astype(int)
+sample['lung_disease_1'] = (sample[noncardio_1] == 1).any(axis=1).astype(int)
+sample['asthma_1'] = (sample[noncardio_1] == 2).any(axis=1).astype(int)
+sample['osteoporosis_1'] = (sample[noncardio_1] == 4).any(axis=1).astype(int)
+sample['parkinson_1'] = (sample[noncardio_1] == 6).any(axis=1).astype(int)
+sample['alzheimer_1'] = (sample[noncardio_1] == 8).any(axis=1).astype(int)
+sample['dementia_1'] = (sample[noncardio_1] == 9).any(axis=1).astype(int)
 
 ########## Data cleaning - main analysis
 # squared age (in year 2002)
@@ -273,7 +278,6 @@ sample['limit_1'] = np.select(condlist=[(sample['heill_1'] == 1) & (sample['heli
                               choicelist=[1, 0, 0],
                               default=np.nan)
 
-# no all NAs in cardio & noncardio
 # diabetes and/or hypertension (at wave 1)
 sample['diabetes_hypertension_1'] = (sample[cardio_1].isin([1, 7])).any(axis=1).astype(int)
 # angina, heart attack or stroke
@@ -287,6 +291,8 @@ sample['bad_health_0'] = np.select(condlist=[sample['genhelf2_0'] == 3, sample['
                                    choicelist=[1, 0],
                                    default=np.nan)
 
+# sample['genhelf_0'].value_counts(dropna=False) # good to use for self_health_0
+
 # bad general health according to GHQ12 (at HSE interview)
 # sample['ghqg2_0'].value_counts(dropna=False) # NAs present
 sample['bad_ghq_0'] = np.select(condlist=[sample['ghqg2_0'] == 3, sample['ghqg2_0'].isin([1, 2])],
@@ -298,8 +304,19 @@ sample['bad_ghq_0'] = np.select(condlist=[sample['ghqg2_0'] == 3, sample['ghqg2_
 
 # hypertensive blood pressure (at HSE interview)
 illness_0 = [f'illsm{number}_0' for number in range(1, 7)]
-(sample[illness_0] <= -2).all(axis=1).sum() # no all NAs
+# (sample[illness_0] <= -2).all(axis=1).sum() # no all NAs
 sample['high_bp_0'] = np.where((sample[illness_0] == 17).any(axis=1), 1, 0)
+# eye at wave 0
+sample['eye_0'] = np.where((sample[illness_0] == 9).any(axis=1), 1, 0)
+# hear at wave 0
+sample['hear_0'] = np.where((sample[illness_0] == 11).any(axis=1), 1, 0)
+sample['heart_attack_angina_0'] = np.where((sample[illness_0] == 16).any(axis=1), 1, 0)
+sample['stroke_0'] = np.where((sample[illness_0] == 15).any(axis=1), 1, 0)
+sample['diabetes_0'] = np.where((sample[illness_0] == 2).any(axis=1), 1, 0)
+sample['arthritis_0'] = np.where((sample[illness_0] == 34).any(axis=1), 1, 0)
+sample['cancer_0'] = np.where((sample[illness_0] == 1).any(axis=1), 1, 0)
+sample['psych_depress_0'] = np.where((sample[illness_0] == 4).any(axis=1), 1, 0)
+sample['asthma_0'] = np.where((sample[illness_0] == 23).any(axis=1), 1, 0)
 
 # current smoker (at wave 1)
 # sample['smoker_1'].value_counts(dropna=False) # no NAs
@@ -313,22 +330,33 @@ sample['smoke_past_1'] = np.select(condlist=[sample['smokerstat_1'].isin([1, 2, 
                                    choicelist=[1, 0],
                                    default=np.nan)
 
-# drinks over limit per week (at wave 1) #TODO
+# drinks over limit per week (at wave 1)
+sample['drink_over_1'] = np.select(condlist=[sample['heala_1'] == 1,
+                                             sample['heala_1'].isin([2, 3, 4, 5, 6])],
+                                   choicelist=[1, 0],
+                                   default=np.nan)
+
+sample['drink_now_1'] = np.where(sample['heala_1'] < 0, np.nan, sample['heala_1'])
 
 # never engages activities neither vigorous nor moderate (at wave 1)
 # sample['heacta_1'].value_counts(dropna=False) # no NAs
-sample['no_activities_1'] = np.select(condlist=[((sample['heacta_1'] == 4) & (sample['heactb_1'] == 4)), ((sample['heacta_1'] < 0) | (sample['heactb_1'] < 0))],
+sample['no_activities_1'] = np.select(condlist=[((sample['heacta_1'] == 4) & (sample['heactb_1'] == 4) & (sample['heactc_1'] == 4)),
+                                                ((sample['heacta_1'] < 0) | (sample['heactb_1'] < 0) | (sample['heactc_1'] < 0))],
                                       choicelist=[1, np.nan],
                                       default=0)
+
+sample['high_activities_1'] = np.where(sample['heacta_1'] < 0, np.nan, sample['heacta_1'])
+sample['middle_activities_1'] = np.where(sample['heactb_1'] < 0, np.nan, sample['heactb_1'])
+sample['low_activities_1'] = np.where(sample['heactc_1'] < 0, np.nan, sample['heactc_1'])
 
 # missing likelihood that health limits ability to work (at wave 1)
 # sample['exhlim_1'].value_counts(dropna=False) # NAs present
 sample['ex_limit_missing_1'] = np.where(sample['exhlim_1'] < 0, 1, 0)
 
 # both parents dead (at wave 1)
-# sample['malive_1'].value_counts(dropna=False) # NAs present
-sample['parents_died_1'] = np.select(condlist=[((sample['malive_1'] == 2) & sample['falive_1'] == 2),
-                                               ((sample['malive_1'] < 0) | (sample['falive_1'] < 0))],
+# pd.crosstab(sample['malive_1'], sample['falive_1']) # NAs present
+sample['parents_died_1'] = np.select(condlist=[(sample['malive_1'] == 2) & (sample['falive_1'] == 2),
+                                               (sample['malive_1'] < 0) | (sample['falive_1'] < 0)],
                                      choicelist=[1, np.nan],
                                      default=0)
 
@@ -361,6 +389,40 @@ sample['private_health_1'] = np.select(condlist=[sample['wpphi_1'].isin([1, 2]),
 # missing likelihood of being alive in next 10 years (at wave 1)
 # sample['exlo80_1'].value_counts(dropna=False) # NAs present
 sample['ex_alive_missing_1'] = np.where(sample['exlo80_1'] < 0, 1, 0)
+
+########## Data cleaning - health stock
+# memory at wave 1
+sample['memory_1'] = np.where(sample['cfmetm_1'] < 0, np.nan, sample['cfmetm_1'])
+# see at wave 1
+sample['eye_1'] = np.where(sample['heeye_1'] < 0, np.nan, sample['heeye_1'])
+# hear at wave 1
+sample['hear_1'] = np.where(sample['hehear_1'] < 0, np.nan, sample['hehear_1'])
+# walk at wave 1
+sample['walk_1'] = np.where(sample['hefunc_1'] < 0, np.nan, sample['hefunc_1'])
+
+# age at wave 0
+sample['age_0'] = np.where(sample['ager_0'] < 0, np.nan, sample['ager_0'])
+
+# education at wave 0
+# sample['topqual3_0'].value_counts(dropna=False) # NaN is safe to use in np.where
+sample['degree_0'] = np.where(sample['topqual3_0'] == 1, 1, 0)
+sample['below_degree_0'] = np.where(sample['topqual3_0'] == 2, 1, 0)
+sample['a_levels_0'] = np.where(sample['topqual3_0'] == 3, 1, 0)
+sample['o_levels_0'] = np.where(sample['topqual3_0'] == 4, 1, 0)
+sample['no_qual_0'] = np.where(sample['topqual3_0'] == 7, 1, 0)
+
+# job characteristics at wave 0
+# sample['ftptime_0'].value_counts(dropna=False) # -1 present
+sample['job_ft_0'] = np.where(sample['ftptime_0'] < 0, np.nan, sample['ftptime_0'])
+# sample['employe_0'].value_counts(dropna=False) # -1 present
+sample['job_employ_0'] = np.where(sample['employe_0'] < 0, np.nan, sample['employe_0'])
+
+# smoke now at wave 0
+sample['cignow_0'].value_counts(dropna=False) # -1 needs to be changed to 2
+sample['smoke_now_0'] = np.where(sample['cignow_0'] == -1, 2, sample['cignow_0'])
+
+# drink now at wave 0
+# sample['dnnow_0'].value_counts(dropna=False) # good to use
 
 ########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_cleaned.csv'), index=False)
