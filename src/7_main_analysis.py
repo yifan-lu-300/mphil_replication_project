@@ -14,21 +14,12 @@ derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
 # Read data
 sample = pd.read_csv(os.path.join(derived_path, 'sample_health_stock.csv'))
 
-# Any newly diagnosed disease (post) #TODO: transfer this part to 4_simulate_retirement?
-disease_list = ['angina', 'heart_attack', 'stroke', 'diabetes', 'arthritis', 'cancer', 'psych']
-sample['any_post'] = (sample[[disease + '_post' for disease in disease_list]] == 1).any(axis=1).astype(int)
-# Any newly diagnosed disease (pre)
-sample['any_pre'] = (sample[[disease + '_pre' for disease in disease_list]] == 1).any(axis=1).astype(int)
-# Newly diagnosed angina, heart attack or stroke (post)
-sample['angina_heart_attack_stroke_post'] = (sample[['angina_post', 'heart_attack_post', 'stroke_post']] == 1).any(axis=1).astype(int)
-# Any newly diagnosed disease (between w1 and retirement)
-sample['any_between'] = ((sample['any_pre'] == 1) & (
-    (sample[[disease + '_1' for disease in disease_list]] != 1).all(axis=1))).astype(int)
-
 # ######### PSM lack Lives in deprived region according to index of multiple deprivation (at wave 1) Lives in very
 # deprived region according to index of multiple deprivation (at wave 1) Has ever had symptomatic heart attack/angina
 # according to Rose questionnaire (at wave 1) ex_work_missing_1, ex_limit_missing_1, bmi_missing_1 and
 # ex_alive_missing_1 deleted due to no variation once the corresponding non-missing variables are controlled for
+
+disease_list = ['angina', 'heart_attack', 'stroke', 'diabetes', 'arthritis', 'cancer', 'psych']
 
 full_set = ['sex_1', 'age_2002', 'age_2002_squared', 'child_in_house_1', 'london_1', 'outside_uk_1', 'degree_1',
             'job_years_1', 'job_permanent_1', 'job_30h_1', 'reach_spa_2004', 'early_retire_incentive_1', 'pen_db_1',
@@ -70,10 +61,10 @@ xset3 = ['sex_1', 'age_2002', 'age_2002_squared', 'child_in_house_1', 'outside_u
 # tt = sample[xset3].apply(lambda x: x.isna().sum() / len(sample), axis=0)
 
 # Estimate propensity score with probit regression
-xset2_formula = 'treatment ~ ' + ' + '.join(xset2)
-xset2_model = smf.probit(xset2_formula, data=sample).fit()
+xset3_formula = 'treatment ~ ' + ' + '.join(xset3)
+xset3_model = smf.probit(xset3_formula, data=sample).fit()
 
-sample['ps_xset2'] = xset2_model.predict(sample)
+sample['ps_xset3'] = xset3_model.predict(sample)
 
 # IPTW for ATT #TODO: not consistent with original results
 # Write a for loop to produce the result table
@@ -182,11 +173,6 @@ matched_sample['weight'] = np.where(matched_sample['treatment'] == 1, 1, matched
 
 nmixx = smf.ols('any_post ~ treatment + ps_xset2', data=matched_sample).fit()
 nmixx.summary()
-
-
-
-
-
 
 # Any chronic disease
 # estimate propensity score using probit regression

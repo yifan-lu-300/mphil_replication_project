@@ -10,11 +10,11 @@ derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
 # Read data
 sample = pd.read_csv(os.path.join(derived_path, 'sample_simulate_retire.csv'))
 
-########## Inspection
-sample['self_health_1'].value_counts(dropna=False)
-sample['genhelf_0'].value_counts(dropna=False)
+# ########## Inspection
+# sample['self_health_1'].value_counts(dropna=False)
+# sample['genhelf_0'].value_counts(dropna=False)
 
-##########
+########## Wave 1
 hs_data_1 = sample[
     ['idauniq', 'self_health_1', 'sex_1', 'age_2002', 'degree_1', 'below_degree_1', 'a_levels_1', 'o_levels_1',
      'no_qual_1', 'job_permanent_1', 'job_years_1', 'job_30h_1', 'hemobwa_1', 'hemobsi_1', 'hemobch_1', 'hemobcs_1',
@@ -58,7 +58,7 @@ hs_probit_0 = OrderedModel(hs_data_0['genhelf_0'],
                            distr='probit').fit(method='bfgs')
 
 probs_0 = hs_probit_0.predict() | p(pd.DataFrame)
-hs_data_0['health_stock_0'] = probs_1.apply(lambda row: row[0] * 1 + row[1] * 2 + row[2] * 3 + row[3] * 4 + row[4] * 5,
+hs_data_0['health_stock_0'] = probs_0.apply(lambda row: row[0] * 1 + row[1] * 2 + row[2] * 3 + row[3] * 4 + row[4] * 5,
                                             axis=1)
 (pn.ggplot(hs_data_0, pn.aes(x='genhelf_0', y='health_stock_0')) +
  pn.geom_point() +

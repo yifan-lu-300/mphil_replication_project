@@ -104,7 +104,7 @@ sample['total_wealth_1'] = sample['nettotw_bu_s_1'].apply(lambda x: np.nan if x 
 # employment income per week #TODO 
 # (sample['empinc_r_s_1'] < 0).sum() # no NAs
 
-# number of difficulties in ADL #TODO: confirm with mobility items from ifs_derived, but should be okay as values are consistent with original table
+# number of difficulties in ADL
 adl_1 = [f'heada0{number}_1' for number in range(1, 10)] + ['heada10_1', 'heada11_1']
 # sample[adl_1].apply(lambda x: x.isin([-9, -8, -1])).all(axis=1).sum() # no NAs
 sample['adl_1'] = ((sample[adl_1] >= 1) & (sample[adl_1] <= 10)).sum(axis=1)
@@ -130,7 +130,7 @@ sample['self_health_1'] = np.select(condlist=[sample['hehelf_1'] == 1,
                                               sample['hegenh_1'] == 4,
                                               sample['hegenh_1'] == 5],
                                     choicelist=[1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
-                                    default=np.nan).astype(str)
+                                    default=np.nan)
 
 # has diagnosed cardio disease #TODO retired
 cardio_1 = [f'hedim0{number}_1' for number in range(1, 8)]
@@ -157,7 +157,8 @@ sample['ex_limit_1'] = np.where(sample['exhlim_1'] < 0, np.nan, sample['exhlim_1
 ########## Data cleaning - health after retirement table
 # poor self-assessed health
 # sample['hegenh_3'].value_counts() # NAs present, but no concerns over two versions of self-reported health
-sample['poor_health_3'] = np.select(condlist=[sample['hegenh_3'].isin([4, 5]), sample['hegenh_3'].isin([1, 2, 3])],
+sample['poor_health_3'] = np.select(condlist=[sample['hegenh_3'].isin([4, 5]),
+                                              sample['hegenh_3'].isin([1, 2, 3])],
                                     choicelist=[1, 0],
                                     default=np.nan)
 
@@ -265,7 +266,8 @@ cesd_list_1 = ['psceda_1', 'pscedb_1', 'pscedc_1', 'pscedd_1', 'pscede_1', 'psce
 # reverse the score of positive items
 sample['pscedd_1'] = sample['pscedd_1'].replace({1: 2, 2: 1})
 sample['pscedf_1'] = sample['pscedf_1'].replace({1: 2, 2: 1})
-sample['cesd_1'] = np.select(condlist=[(sample[cesd_list_1] < 0).any(axis=1), (sample[cesd_list_1] == 1).sum(axis=1) >= 3],
+sample['cesd_1'] = np.select(condlist=[(sample[cesd_list_1] < 0).any(axis=1),
+                                       (sample[cesd_list_1] == 1).sum(axis=1) >= 3],
                              choicelist=[np.nan, 1],
                              default=0)
 
@@ -287,7 +289,8 @@ sample['arthritis_osteoporosis_1'] = (sample[noncardio_1].isin([3, 4])).any(axis
 
 # bad or very bad self-assessed health (at HSE interview)
 # sample['genhelf2_0'].value_counts(dropna=False) # NAs present
-sample['bad_health_0'] = np.select(condlist=[sample['genhelf2_0'] == 3, sample['genhelf2_0'].isin([1, 2])],
+sample['bad_health_0'] = np.select(condlist=[sample['genhelf2_0'] == 3,
+                                             sample['genhelf2_0'].isin([1, 2])],
                                    choicelist=[1, 0],
                                    default=np.nan)
 
@@ -326,7 +329,8 @@ sample['smoke_now_1'] = np.select(condlist=[sample['smoker_1'] == 1, sample['smo
 
 # ex-smoker (at wave 1)
 # sample['smokerstat_1'].value_counts(dropna=False) # no NAs
-sample['smoke_past_1'] = np.select(condlist=[sample['smokerstat_1'].isin([1, 2, 3]), sample['smokerstat_1'].isin([0, 4])],
+sample['smoke_past_1'] = np.select(condlist=[sample['smokerstat_1'].isin([1, 2, 3]),
+                                             sample['smokerstat_1'].isin([0, 4])],
                                    choicelist=[1, 0],
                                    default=np.nan)
 
@@ -368,7 +372,8 @@ sample['recall_words_1'] = np.where(sample['cflisen_1'] < 0, np.nan, sample['cfl
 
 # body mass index over 35 (at HSE nurse interview)
 # sample['bmival_0'].value_counts(dropna=False) # NAs present
-sample['bmi_0'] = np.select(condlist=[sample['bmival_0'] >= 35, (sample['bmival_0'] < 0) | (sample['bmival_0'].isna())],
+sample['bmi_0'] = np.select(condlist=[sample['bmival_0'] >= 35,
+                                      (sample['bmival_0'] < 0) | (sample['bmival_0'].isna())],
                             choicelist=[1, np.nan],
                             default=0)
 # missing body mass index (at HSE nurse interview)
@@ -418,7 +423,7 @@ sample['job_ft_0'] = np.where(sample['ftptime_0'] < 0, np.nan, sample['ftptime_0
 sample['job_employ_0'] = np.where(sample['employe_0'] < 0, np.nan, sample['employe_0'])
 
 # smoke now at wave 0
-sample['cignow_0'].value_counts(dropna=False) # -1 needs to be changed to 2
+# sample['cignow_0'].value_counts(dropna=False) # -1 needs to be changed to 2
 sample['smoke_now_0'] = np.where(sample['cignow_0'] == -1, 2, sample['cignow_0'])
 
 # drink now at wave 0
