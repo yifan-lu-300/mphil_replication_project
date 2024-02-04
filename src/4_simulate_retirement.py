@@ -141,17 +141,3 @@ sample['any_between'] = (sample[[disease + '_between' for disease in disease_lis
 sample.to_csv(os.path.join(derived_path, 'sample_simulate_retire.csv'), index=False)
 
 ########## Inspection
-sample['angina_post'].value_counts(dropna=False)
-sample['heart_attack_post'].value_counts(dropna=False)
-
-sample['stroke_post'].value_counts(dropna=False)
-sample['stroke_2'].value_counts(dropna=False)
-sample['stroke_3'].value_counts(dropna=False)
-sample['hedimst_3'].value_counts(dropna=False)
-
-sample['cancer_post'].value_counts(dropna=False)
-sample['cancer_2'].value_counts(dropna=False)
-sample['cancer_3'].value_counts(dropna=False)
-sample['hedibca_3'].value_counts(dropna=False)
-
-sample['any_post'].value_counts(dropna=False)

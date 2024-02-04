@@ -41,6 +41,8 @@ vars_2_core = ['idauniq', 'Hehelf', 'Heill', 'Helim'] + \
      'HeAggR', 'HeAggRY', # cancer
      'HeAghR', 'HeAghRY'] # psychiatric
 
+vars_2_ifs = ['idauniq', 'spage']
+
 vars_3_core = ['idauniq', 'hegenh', 'heill', 'helim'] + \
     ['hemobwa', 'hemobsi', 'hemobch', 'hemobcs', 'hemobcl', 'hemobst', 'hemobre', 'hemobpu', 'hemobli', 'hemobpi'] + \
     ['wpactpw', 'wpactse', 'wpdes', 'wplljy', 'wplljm', 'wpactw'] + \
@@ -51,6 +53,8 @@ vars_3_core = ['idauniq', 'hegenh', 'heill', 'helim'] + \
      'dhedibar', 'heagfr', 'heagfry', 'hedibar', # arthritis
      'dhedibca', 'heaggr', 'heaggry', 'hedibca', # cancer
      'dhedibps', 'heaghr', 'heaghry', 'hedibps'] # psychiatric
+
+vars_3_ifs = ['idauniq', 'spage']
 
 # sample selection (following the procedure in working paper Table A1)
 wave_1_core = pd.read_table(os.path.join(origin_path, 'wave_1_core_data_v3.tab'),
@@ -87,8 +91,14 @@ wave_2_core = pd.read_table(os.path.join(origin_path, 'wave_2_core_data_v4.tab')
                             low_memory=False,
                             usecols=vars_2_core)
 
+wave_2_ifs = pd.read_table(os.path.join(origin_path, 'wave_2_ifs_derived_variables.tab'),
+                           low_memory=False,
+                           usecols=vars_2_ifs)
+
+wave_2_full = pd.merge(wave_2_core, wave_2_ifs, how='inner', on='idauniq')
+
 wave_12 = pd.merge(wave_1_full.rename(columns=lambda x: x if x == 'idauniq' else x + '_1'),
-                   wave_2_core.rename(columns=lambda x: x if x == 'idauniq' else x + '_2'),
+                   wave_2_full.rename(columns=lambda x: x if x == 'idauniq' else x + '_2'),
                    how='inner',
                    on='idauniq') # wave 2 attrition, 2369 (2369)
 
@@ -106,8 +116,14 @@ wave_3_core = pd.read_table(os.path.join(origin_path, 'wave_3_elsa_data_v4.tab')
                             low_memory=False,
                             usecols=vars_3_core)
 
+wave_3_ifs = pd.read_table(os.path.join(origin_path, 'wave_3_ifs_derived_variables.tab'),
+                           low_memory=False,
+                           usecols=vars_3_ifs)
+
+wave_3_full = pd.merge(wave_3_core, wave_3_ifs, how='inner', on='idauniq')
+
 wave_123 = pd.merge(wave_12,
-                    wave_3_core.rename(columns=lambda x: x if x == 'idauniq' else x + '_3'),
+                    wave_3_full.rename(columns=lambda x: x if x == 'idauniq' else x + '_3'),
                     how='inner',
                     on='idauniq') # wave 3 attrition, 1769 (1769)
 

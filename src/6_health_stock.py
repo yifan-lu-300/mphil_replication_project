@@ -70,4 +70,3 @@ sample = pd.merge(sample, hs_data_0[['idauniq', 'health_stock_0']], how='left', 
 
 ########## Save data
 sample.to_csv(os.path.join(derived_path, 'sample_health_stock.csv'), index=False)
-
