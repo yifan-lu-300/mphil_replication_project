@@ -19,7 +19,7 @@ sample = pd.read_csv(os.path.join(derived_path, 'sample_health_stock.csv'))
 # according to Rose questionnaire (at wave 1) ex_work_missing_1, ex_limit_missing_1, bmi_missing_1 and
 # ex_alive_missing_1 deleted due to no variation once the corresponding non-missing variables are controlled for
 
-disease_list = ['angina', 'heart_attack', 'stroke', 'diabetes', 'arthritis', 'cancer', 'psych']
+disease_list = ['angina', 'heart_attack', 'diabetes', 'stroke', 'arthritis', 'cancer', 'psych']
 
 full_set = ['sex_1', 'age_2002', 'age_2002_squared', 'child_in_house_1', 'london_1', 'outside_uk_1', 'degree_1',
             'job_years_1', 'job_permanent_1', 'job_30h_1', 'reach_spa_2004', 'early_retire_incentive_1', 'pen_db_1',
@@ -60,121 +60,24 @@ xset3 = ['sex_1', 'age_2002', 'age_2002_squared', 'child_in_house_1', 'outside_u
 # # check whether xset3 has abnormally high NA rate
 # tt = sample[xset3].apply(lambda x: x.isna().sum() / len(sample), axis=0)
 
-# Estimate propensity score with probit regression
-xset3_formula = 'treatment ~ ' + ' + '.join(xset3)
-xset3_model = smf.probit(xset3_formula, data=sample).fit()
-
-sample['ps_xset3'] = xset3_model.predict(sample)
-
-# IPTW for ATT #TODO: not consistent with original results
 # Write a for loop to produce the result table
 main_table = pd.DataFrame(np.nan, index=range(18), columns=['Xset1', 'Xset2', 'Xset3'])
-y_list = ['any_post', 'angina_heart_attack_stroke_post'] + [disease + '_post' for disease in disease_list]
+y_list = ['any_post', 'angina_heart_attack_diabetes_post'] + [disease + '_post' for disease in disease_list]
 x_list = [xset1, xset2, xset3]
 
+########## Simple OLS
 for i, xset in enumerate(x_list):
-    # Estimate propensity score with probit regression
-    ps_formula = 'treatment ~ ' + ' + '.join(xset)
-    ps_model = smf.probit(formula=ps_formula, data=sample).fit()
-    sample[f'ps_xset{i + 1}'] = ps_model.predict(sample)
-
-    # IPTW for ATT
-    sample[f'iptw_xset{i + 1}'] = sample.apply(
-        lambda x: 1 if x['treatment'] == 1 else x[f'ps_xset{i + 1}'] / (1 - x[f'ps_xset{i + 1}']),
-        axis=1)
-
-    # # IPTW for ATE
-    # sample[f'iptw_xset{i + 1}'] = sample.apply(
-    #     lambda x: 1 / x[f'ps_xset{i + 1}'] if x['treatment'] == 1 else 1 / (1 - x[f'ps_xset{i + 1}']),
-    #     axis=1)
-
-    # Estimate ATT
     for j, y in enumerate(y_list):
-        att_model = smf.wls(f'{y} ~ treatment', data=sample, weights=sample[f'iptw_xset{i + 1}']).fit()
-
-        # Save results to main_table
-        main_table.iloc[j * 2, i] = att_model.params['treatment']
-        main_table.iloc[j * 2 + 1, i] = att_model.tvalues['treatment']
-
-for i, xset in enumerate(x_list):
-    # Estimate propensity score with probit regression
-    ps_formula = 'treatment ~ ' + ' + '.join(xset)
-    ps_model = smf.probit(formula=ps_formula, data=sample).fit()
-    sample[f'ps_xset{i + 1}'] = ps_model.predict(sample)
-
-    # KNN matching
-    treatment_df = sample.loc[sample['treatment'] == 1, ['idauniq', f'ps_xset{i + 1}']].dropna()
-    control_df = sample.loc[sample['treatment'] == 0, ['idauniq', f'ps_xset{i + 1}']].dropna()
-    control_df['index'] = range(len(control_df))
-
-    k_nn = NearestNeighbors(n_neighbors=4)
-    k_nn.fit(X=control_df[[f'ps_xset{i + 1}']])
-
-    # Finding control observations
-    matched_k = k_nn.kneighbors(X=treatment_df[[f'ps_xset{i + 1}']], return_distance=False).flatten()
-
-    # Calculate the number of times each matched observation is used
-    control_index, control_count = np.unique(matched_k, return_counts=True)
-    control_id = pd.DataFrame({'index': control_index, 'count': control_count})
-
-    control_df = pd.merge(control_df, control_id, how='left', on='index')
-
-    matched_id = pd.concat([control_df.loc[control_df['count'].notna(), 'idauniq'],
-                            treatment_df['idauniq']]).to_list()
-
-    # Get the final matched sample
-    matched_sample = sample.loc[sample['idauniq'].isin(matched_id), :]
-
-    # Create matching weight
-    matched_sample = pd.merge(matched_sample, control_df[['idauniq', 'count']], how='left', on='idauniq')
-    matched_sample['weight'] = np.where(matched_sample['treatment'] == 1, 1, matched_sample['count'])
-
-    for j, y in enumerate(y_list):
-        # model = smf.wls(f'{y} ~ treatment + ps_xset{i + 1}',
-        #                 data=matched_sample,
-        #                 weights=matched_sample['weight']).fit()
-
-        model = smf.ols(f'{y} ~ treatment + ps_xset{i + 1}',
-                        data=matched_sample).fit()
+        model_formula = f'{y} ~ treatment + ' + ' + '.join(xset)
+        model = smf.ols(formula=model_formula, data=sample).fit()
 
         # Save results to main_table
         main_table.iloc[j * 2, i] = model.params['treatment']
         main_table.iloc[j * 2 + 1, i] = model.tvalues['treatment']
 
-
-########## Radius matching
-treatment_df = sample.loc[sample['treatment'] == 1, ['idauniq', 'ps_xset2']].dropna()
-control_df = sample.loc[sample['treatment'] == 0, ['idauniq', 'ps_xset2']].dropna()
-control_df['index'] = range(len(control_df))
-
-#TODO: I currently did not use sex_1 and age_2002 as balancing scores
-#TODO: I also need to go with k nearest neighbour
-# radius = 0.1 * sample['ps_xset2'].std()
-# r_nn = NearestNeighbors(radius=radius)
-# r_nn.fit(X=control_df[['ps_xset2']])
-# matched_r = r_nn.radius_neighbors(X=treatment_df[['ps_xset2']], return_distance=False)
-
-k_nn = NearestNeighbors(n_neighbors=4)
-k_nn.fit(X=control_df[['ps_xset2']])
-matched_k = k_nn.kneighbors(X=treatment_df[['ps_xset2']], return_distance=False).flatten()
-
-control_index, control_count = np.unique(matched_k, return_counts=True)
-control_id = pd.DataFrame({'index': control_index, 'count': control_count})
-
-control_df = pd.merge(control_df, control_id, how='left', on='index')
-
-matched_id = pd.concat([control_df.loc[control_df['count'].notna(), 'idauniq'],
-                        treatment_df['idauniq']]).to_list()
-
-matched_sample = sample.loc[sample['idauniq'].isin(matched_id), :]
-
-matched_sample = pd.merge(matched_sample, control_df[['idauniq', 'count']], how='left', on='idauniq')
-matched_sample['weight'] = np.where(matched_sample['treatment'] == 1, 1, matched_sample['count'])
-
-nmixx = smf.ols('any_post ~ treatment + ps_xset2', data=matched_sample).fit()
-nmixx.summary()
-
-# Any chronic disease
-# estimate propensity score using probit regression
-
 # IV
+
+
+
+
+########## Inspection

@@ -22,11 +22,11 @@ sample['retire_month_diff'] = (sample['retire_month'].dt.to_period('M') - sample
 # sample['retire_month_diff'].notnull() | p(sum) # 181 (192 retired respondents)
 
 # Build training regression
-reg_train_1 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + outside_uk_1 + '
+reg_train_1 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
                       'below_degree_1 + a_levels_1 + o_levels_1 + no_qual_1 + early_retire_incentive_1 + pen_db_1 + '
-                      'pen_dc_1 + pen_any_1 + gor_1',
+                      'pen_dc_1 + pen_any_1 + gor_1 + adl_1 + poor_health_1 + cardio_1 + noncardio_1',
                       data=sample).fit()
-reg_train_1.summary2() | p(print) # R = 0.293, N = 175, Adjusted R = 0.196 (*)
+reg_train_1.summary() # R = 0.303, N = 176, Adjusted R = 0.193 (*)
 
 reg_train_2 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
                       'below_degree_1 + a_levels_1 + o_levels_1 + no_qual_1 + early_retire_incentive_1 + pen_db_1 + '
@@ -54,18 +54,18 @@ tt = pd.DataFrame({'resid': reg_train_2.resid})
 
 # I will try model 2 first, as it has good adjusted R
 np.random.seed(1)
-sample['pred_month_diff_2'] = reg_train_2.predict(sample) + (reg_train_2.resid | p(np.random.choice, size=1)) | p(round)
+sample['pred_retire_month_diff'] = reg_train_2.predict(sample) + (reg_train_2.resid | p(np.random.choice, size=1)) | p(round)
 
-sample['pred_month_2'] = sample.apply(
-    lambda row: (pd.DateOffset(months=row['pred_month_diff_2']) + row['birth_month'])
-    if not (pd.isna(row['pred_month_diff_2']) or pd.isna(row['birth_month'])) 
+sample['pred_retire_month'] = sample.apply(
+    lambda row: (pd.DateOffset(months=row['pred_retire_month_diff']) + row['birth_month'])
+    if not (pd.isna(row['pred_retire_month_diff']) or pd.isna(row['birth_month']))
     else None, 
     axis=1
 )
 
-sample['final_month_2'] = np.where(sample['treatment'] == 0, sample['pred_month_2'], sample['retire_month'])
+sample['final_retire_month'] = np.where(sample['treatment'] == 0, sample['pred_retire_month'], sample['retire_month'])
 # check
-pd.isna(sample['final_month_2']).sum() # there are 39 NAs is the final retirement month, as there are missing values in some of the predictors
+pd.isna(sample['final_retire_month']).sum() # there are 36 NAs is the final retirement month, as there are missing values in some of the predictors
 
 ########## Disease date vs. Retirement date
 # no NAs in angina_1, and NAs in angina_2 and angina_3 all mean 'not applicable' rather than e.g. refusal
@@ -73,12 +73,12 @@ pd.isna(sample['final_month_2']).sum() # there are 39 NAs is the final retiremen
 def disease_pre_retire(row, name):
     if pd.isna(row[f'{name}_2']) & pd.isna(row[f'{name}_3']):
         return np.where(row[f'{name}_1'] == 1, 1, 0)
-    elif pd.isna(row['final_month_2']):
+    elif pd.isna(row['final_retire_month']):
         return None
     elif pd.notna(row[f'{name}_2']):
-        return np.where(pd.to_datetime(row[f'{name}_2']) <= row['final_month_2'], 1, 0)
+        return np.where(pd.to_datetime(row[f'{name}_2']) <= row['final_retire_month'], 1, 0)
     elif pd.notna(row[f'{name}_3']):
-        return np.where(pd.to_datetime(row[f'{name}_3']) <= row['final_month_2'], 1, 0)
+        return np.where(pd.to_datetime(row[f'{name}_3']) <= row['final_retire_month'], 1, 0)
 
 sample['angina_pre'] = sample.apply(disease_pre_retire, name='angina', axis=1)
 sample['heart_attack_pre'] = sample.apply(disease_pre_retire, name='heart_attack', axis=1)
@@ -93,12 +93,12 @@ def disease_post_retire(row, name):
         return 0
     elif pd.isna(row[f'{name}_2']) & pd.isna(row[f'{name}_3']):
         return 0
-    elif pd.isna(row['final_month_2']):
+    elif pd.isna(row['final_retire_month']):
         return None
     elif pd.notna(row[f'{name}_2']):
-        return np.where(pd.to_datetime(row[f'{name}_2']) > row['final_month_2'], 1, 0)
+        return np.where(pd.to_datetime(row[f'{name}_2']) > row['final_retire_month'], 1, 0)
     elif pd.notna(row[f'{name}_3']):
-        return np.where(pd.to_datetime(row[f'{name}_3']) > row['final_month_2'], 1, 0)
+        return np.where(pd.to_datetime(row[f'{name}_3']) > row['final_retire_month'], 1, 0)
 
 sample['angina_post'] = sample.apply(disease_post_retire, name='angina', axis=1)
 sample['heart_attack_post'] = sample.apply(disease_post_retire, name='heart_attack', axis=1)
@@ -115,7 +115,7 @@ sample['any_post'] = (sample[[disease + '_post' for disease in disease_list]] ==
 # Any diagnosed disease (pre)
 sample['any_pre'] = (sample[[disease + '_pre' for disease in disease_list]] == 1).any(axis=1).astype(int)
 # Newly diagnosed angina, heart attack or stroke (post)
-sample['angina_heart_attack_stroke_post'] = (sample[['angina_post', 'heart_attack_post', 'stroke_post']] == 1).any(axis=1).astype(int)
+sample['angina_heart_attack_diabetes_post'] = (sample[['angina_post', 'heart_attack_post', 'diabetes_post']] == 1).any(axis=1).astype(int)
 # Any newly diagnosed disease (between w1 and retirement)
 def disease_between(row, name):
     if row[f'{name}_1'] == 1:
@@ -141,3 +141,17 @@ sample['any_between'] = (sample[[disease + '_between' for disease in disease_lis
 sample.to_csv(os.path.join(derived_path, 'sample_simulate_retire.csv'), index=False)
 
 ########## Inspection
+sample['angina_post'].value_counts(dropna=False)
+sample['heart_attack_post'].value_counts(dropna=False)
+
+sample['stroke_post'].value_counts(dropna=False)
+sample['stroke_2'].value_counts(dropna=False)
+sample['stroke_3'].value_counts(dropna=False)
+sample['hedimst_3'].value_counts(dropna=False)
+
+sample['cancer_post'].value_counts(dropna=False)
+sample['cancer_2'].value_counts(dropna=False)
+sample['cancer_3'].value_counts(dropna=False)
+sample['hedibca_3'].value_counts(dropna=False)
+
+sample['any_post'].value_counts(dropna=False)
