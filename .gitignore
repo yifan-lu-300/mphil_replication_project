@@ -1,4 +1,6 @@
 data/
+figure/
 .idea/
 src/0_inspection.py
 *.pdf
+*.png
