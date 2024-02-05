@@ -27,11 +27,11 @@ reg_train_1 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + de
                       data=sample).fit()
 reg_train_1.summary() # R = 0.303, N = 176, Adjusted R = 0.193 (*)
 
-reg_train_2 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
+model_origin = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
                       'below_degree_1 + a_levels_1 + o_levels_1 + no_qual_1 + early_retire_incentive_1 + pen_db_1 + '
                       'pen_dc_1 + pen_any_1 + gor_1',
                       data=sample).fit()
-reg_train_2.summary2() | p(print) # R = 0.294, N = 176, Adjusted R = 0.203 (*)
+model_origin.summary2() | p(print) # R = 0.294, N = 176, Adjusted R = 0.203 (*)
 
 # reg_train_3 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
 #                       'below_degree_1 + a_levels_1 + o_levels_1 + no_qual_1 + early_retire_incentive_1 + pen_db_1 + '
@@ -48,12 +48,12 @@ reg_train_2.summary2() | p(print) # R = 0.294, N = 176, Adjusted R = 0.203 (*)
 # reg_train_4.summary() | p(print) # R = 0.954 (this is abnormally high), N = 28;
 
 # Take a look at the residual distribution
-tt = pd.DataFrame({'resid': reg_train_2.resid})
+tt = pd.DataFrame({'resid': model_origin.resid})
 (pn.ggplot(tt, pn.aes('resid')) + pn.geom_histogram(fill='white', colour='black'))
 
 # I will try model 2 first, as it has good adjusted R
 np.random.seed(1)
-sample['pred_retire_month_diff'] = reg_train_2.predict(sample) + (reg_train_2.resid | p(np.random.choice, size=len(sample))) \
+sample['pred_retire_month_diff'] = model_origin.predict(sample) + (model_origin.resid | p(np.random.choice, size=len(sample))) \
                                    | p(round)
 
 # sample['pred_retire_month_diff'].value_counts(dropna=False)
