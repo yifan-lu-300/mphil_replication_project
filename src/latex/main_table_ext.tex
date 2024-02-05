@@ -1,0 +1,63 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage[margin = 1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy} % Turn on the style
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[R]{\thepage} % R = Right
+\renewcommand{\headrulewidth}{0pt} % remove the header rule
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{% Redefine plain style, which is used for title page
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[R]{\thepage} % R = Right
+\renewcommand{\headrulewidth}{0pt} % remove the header rule
+\renewcommand{\footrulewidth}{0pt}}
+
+\usepackage{setspace}
+\onehalfspacing % set line spacing to 1.5
+\usepackage{parskip}
+
+\title{\vspace{-8ex} Replication project \vspace{-2ex}}
+\author{Does retirement trigger ill health?}
+\date{\vspace{-4ex}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\begin{tabular}{lllll}
+    \toprule
+     & ATET & ATET & ATET & ATET \\
+     & Xset 1 & Xset 2 & Xset 3 & Xset 4 \\
+    \midrule
+    Any chronic disease & $0.085^{***}$ & $0.078^{***}$ & $0.087^{***}$ & 0.198 \\
+    & [4.10] & [3.57] & [4.29] & [1.57] \\
+   Angina, heart attack or stroke & $0.033^{**}$ & $0.027^{**}$ & $0.033^{**}$ & 0.018 \\
+    & [2.70] & [2.04] & [2.77] & [0.35] \\
+   Angina & $0.011^{**}$ & $0.012^{**}$ & $0.012^{**}$ & 0.008 \\
+    & [2.54] & [2.53] & [2.82] & [0.9] \\
+   Heart attack & 0.011 & 0.013 & 0.012 & 0.029 \\
+    & [1.60] & [1.69] & [1.81] & [1.28] \\
+   Stroke & $0.022^{**}$ & 0.014 & $0.021^{**}$ & -0.011 \\
+    & [2.14] & [1.28] & [2.09] & [-0.24] \\
+   Diabetes & 0.003 & 0.004 & 0.005 & 0.041 \\
+    & [1.08] & [1.08] & [1.77] & [1.42] \\
+   Arthritis & $0.049^{**}$ & $0.043^{**}$ & $0.050^{**}$ & 0.024 \\
+    & [3.11] & [2.57] & [3.25] & [0.23] \\
+   Cancer & $0.019^{**}$ & 0.010 & $0.018^{**}$ & 0.061 \\
+    & [2.78] & [1.50] & [2.64] & [1.66] \\
+   Psychiatric & -0.003 & 0.002 & -0.003 & 0.070 \\
+    & [-0.55] & [0.41] & [-0.46] & [1.69] \\
+    \bottomrule
+    \end{tabular}
+
+\end{document}
