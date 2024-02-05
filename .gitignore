@@ -4,3 +4,4 @@ figure/
 src/0_inspection.py
 *.pdf
 *.png
+*.DS_Store
