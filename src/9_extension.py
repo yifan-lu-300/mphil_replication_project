@@ -38,7 +38,9 @@ sample_train = sample.loc[sample['idauniq'].isin(train_id), :]
 sample_test = sample.loc[sample['idauniq'].isin(test_id), :]
 
 ########## Apply the original model on test data
-sample_test['pred_origin'] = reg_train_2.predict(sample_test) +
+sample_test['pred_origin'] = reg_train_2.predict(sample_test) + (reg_train_2.resid | p(np.random.choice,
+                                                                                       size=len(sample_test))) \
+                             | p(round)
 
 # Take a look at the residual distribution
 tt = pd.DataFrame({'resid': reg_train_2.resid})

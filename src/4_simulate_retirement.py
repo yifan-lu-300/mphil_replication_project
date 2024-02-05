@@ -53,7 +53,10 @@ tt = pd.DataFrame({'resid': reg_train_2.resid})
 
 # I will try model 2 first, as it has good adjusted R
 np.random.seed(1)
-sample['pred_retire_month_diff'] = reg_train_2.predict(sample) + (reg_train_2.resid | p(np.random.choice, size=1)) | p(round)
+sample['pred_retire_month_diff'] = reg_train_2.predict(sample) + (reg_train_2.resid | p(np.random.choice, size=len(sample))) \
+                                   | p(round)
+
+# sample['pred_retire_month_diff'].value_counts(dropna=False)
 
 sample['pred_retire_month'] = sample.apply(
     lambda row: (pd.DateOffset(months=row['pred_retire_month_diff']) + row['birth_month'])
@@ -64,11 +67,11 @@ sample['pred_retire_month'] = sample.apply(
 
 sample['final_retire_month'] = np.where(sample['treatment'] == 0, sample['pred_retire_month'], sample['retire_month'])
 # check
-pd.isna(sample['final_retire_month']).sum() # there are 36 NAs is the final retirement month, as there are missing values in some of the predictors
+# pd.isna(sample['final_retire_month']).sum() # 36 NAs in final retirement month, due to NAs in some predictors
 
 ########## Disease date vs. Retirement date
 # no NAs in angina_1, and NAs in angina_2 and angina_3 all mean 'not applicable' rather than e.g. refusal
-# angina_1 is binary, angina_2 and angina_3 are datetime
+# angina_1 is binary, angina_2 and angina_3 are datetime object
 def disease_pre_retire(row, name):
     if pd.isna(row[f'{name}_2']) & pd.isna(row[f'{name}_3']):
         return np.where(row[f'{name}_1'] == 1, 1, 0)
