@@ -12,7 +12,6 @@ sample = pd.read_csv(os.path.join(derived_path, 'sample_cleaned.csv'),
                      low_memory=False,
                      parse_dates=['retire_month']) # datetime info will not be preserved in to_csv
 
-# Approach 1: Regression
 # Assume people are all born in July
 sample['birth_month'] = (sample['indobyr_1'].astype(str) + '-6') | p(pd.to_datetime)
 
