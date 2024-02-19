@@ -32,6 +32,7 @@ model_origin = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + d
                       'pen_dc_1 + pen_any_1 + gor_1',
                       data=sample).fit()
 model_origin.summary2() | p(print) # R = 0.294, N = 176, Adjusted R = 0.203 (*)
+model_origin.summary2().as_latex() | p(print)
 
 # reg_train_3 = smf.ols('retire_month_diff ~ sex_1 + married_1 + grandchild_1 + degree_1 + '
 #                       'below_degree_1 + a_levels_1 + o_levels_1 + no_qual_1 + early_retire_incentive_1 + pen_db_1 + '

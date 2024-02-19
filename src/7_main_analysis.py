@@ -14,9 +14,13 @@ derived_path = os.path.abspath('..') | p(os.path.join, 'data', 'derived')
 # Read data
 sample = pd.read_csv(os.path.join(derived_path, 'sample_health_stock.csv'))
 
-# ######### PSM lack Lives in deprived region according to index of multiple deprivation (at wave 1) Lives in very
-# deprived region according to index of multiple deprivation (at wave 1) Has ever had symptomatic heart attack/angina
-# according to Rose questionnaire (at wave 1) ex_work_missing_1, ex_limit_missing_1, bmi_missing_1 and
+# ######### PSM lack 8 variables
+# Lives in deprived region according to index of multiple deprivation (at wave 1)
+# Lives in very deprived region according to index of multiple deprivation (at wave 1)
+# Has ever had symptomatic heart attack/angina according to Rose questionnaire (at wave 1)
+# ex_work_missing_1,
+# ex_limit_missing_1,
+# bmi_missing_1
 # ex_alive_missing_1 deleted due to no variation once the corresponding non-missing variables are controlled for
 
 disease_list = ['angina', 'heart_attack', 'diabetes', 'stroke', 'arthritis', 'cancer', 'psych']
